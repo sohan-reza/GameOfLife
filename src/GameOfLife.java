@@ -12,8 +12,11 @@ public class GameOfLife{
     private boolean[] isClickedArray;
     private static boolean isPlay = false;
 
-    private static int square = 40;
-    private static int cols=15;
+    private static int window_width = 600;
+    private static int window_height = 640;
+    private static int square = 20;
+    private static int cols = (window_width/square);
+    private static int rows = (window_height/square);
     public GameOfLife() {
 
     }
@@ -22,12 +25,12 @@ public class GameOfLife{
         JFrame jFrame = new JFrame();
         jFrame.setTitle("Game Of Life");
         jFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        jFrame.setSize(600, 630);
+        jFrame.setSize(window_width, window_height);
         jFrame.setLocationRelativeTo(null);
 
 
-
-        isClickedArray = new boolean[105];
+        //120 extra
+        isClickedArray = new boolean[(rows*cols)+120];
 
 
 
@@ -41,7 +44,7 @@ public class GameOfLife{
                 super.paintComponent(g);
 
                 for (int i = 0; i < isClickedArray.length; i++) {
-                    if((i%15) == 0) {
+                    if((i%cols) == 0) {
                         int row=i/cols;
                         startX = 0;
                         startY = square*row;
@@ -130,24 +133,9 @@ public class GameOfLife{
 
             int[][] directions = new int[][] {{-1,-1,-1},{-1,-1,-1},{-1,-1,-1}};
 
-            int center = i;
-            int right = center+1;
-            int left = center-1;
 
-            int top = i-cols;
-            int top_left = top-1;
-            int top_right = top+1;
-
-            int bottom = i+cols;
-            int bottom_left = bottom-1;
-            int bottom_right = bottom+1;
-
-//                System.out.println(top_left+" "+top+" "+top_right);
-//                System.out.println(left+" "+center+" "+right);
-//                System.out.println(bottom_left+" "+bottom+" "+bottom_right);
-
-            int currentRow = (int) Math.floor((double) i/15);
-            int currentCol = i%15;
+            int currentRow = (int) Math.floor((double) i/cols);
+            int currentCol = i%cols;
 
             if((currentRow>0 && currentRow<(board.length/cols)-1) && (currentCol > 0 && currentCol < cols-1)) {
                 directions[0][0] = i-cols-1;
@@ -255,13 +243,11 @@ public class GameOfLife{
             //Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.
 
             if(board[i] && (liveCellCount < 2 || liveCellCount > 3 )) {
-                System.out.println(i + " will die");
                 tmp[i] = false;
             }else if(board[i] && (liveCellCount == 2 || liveCellCount == 3)) {
                 tmp[i] = true;
             }else if(!board[i] && liveCellCount == 3) {
                 //live in next gen
-                System.out.println(i + " will live");
                 tmp[i] = true;
             }
 
