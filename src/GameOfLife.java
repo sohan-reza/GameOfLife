@@ -5,6 +5,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.util.Arrays;
+import java.util.EventObject;
 import java.util.Scanner;
 
 public class GameOfLife{
@@ -17,7 +18,7 @@ public class GameOfLife{
     private static int window_width = 700;
     private static int window_height = 740;
     private static int square = 10;
-    private static int cols =  20; //(window_width/square);
+    private static int cols =  (window_width/square);
     private static int rows = (window_height/square);
     public GameOfLife() {
 
@@ -52,7 +53,7 @@ public class GameOfLife{
                     }
 
 
-                    g.setColor(Color.BLACK);
+                    g.setColor(Color.GRAY);
                     g.drawRect(startX + (i % cols) * square, startY, square, square);
 
 
@@ -62,8 +63,9 @@ public class GameOfLife{
                         g.setColor(Color.WHITE);
                     }
 
-
                     g.fillRect(startX + (i%cols * square )+1, startY+1, square-1, square-1);
+
+                    //g.fillRect(startX + (i%cols * square )+2, startY+2, square-3, square-3);
 
                 }
             }
@@ -74,7 +76,7 @@ public class GameOfLife{
             @Override
             public void mouseClicked(MouseEvent e) {
                 int index = ((e.getX()/square))+((e.getY()/square)*cols);
-                JOptionPane.showMessageDialog(panel, index);
+                //JOptionPane.showMessageDialog(panel, index);
                 if (index >= 0 && index < isClickedArray.length) {
                     isClickedArray[index] = !isClickedArray[index];
                     panel.repaint();
@@ -113,6 +115,13 @@ public class GameOfLife{
         zoomOutButton.setPreferredSize(new Dimension(50,30));
         zoomOutButton.setBorder(BorderFactory.createLineBorder(Color.BLACK));
         zoomOutButton.setEnabled(false);
+
+        JButton clearButton = new JButton();
+        clearButton.setIcon(new ImageIcon("icon/eraser.png"));
+        clearButton.setContentAreaFilled(false);
+        clearButton.setPreferredSize(new Dimension(50,30));
+        clearButton.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+       
 
         startButton.addMouseListener(new MouseAdapter() {
             @Override
@@ -158,6 +167,17 @@ public class GameOfLife{
             }
         });
 
+        clearButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                clearButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            }
+            @Override
+            public void mouseExited(MouseEvent e) {
+                clearButton.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+            }
+        });
+
 
 
 
@@ -166,7 +186,9 @@ public class GameOfLife{
             public void actionPerformed(ActionEvent e) {
                 if(isPlay) {
                     startButton.setIcon(playIcon);
+
                     stepButton.setEnabled(true);
+                    clearButton.setEnabled(true);
 
                     if(square>10 && square<30) {
                         zoomButton.setEnabled(true);
@@ -181,13 +203,16 @@ public class GameOfLife{
 
                 }else{
                     startButton.setIcon(pauseIcon);
+
                     stepButton.setEnabled(false);
                     zoomButton.setEnabled(false);
                     zoomOutButton.setEnabled(false);
+                    clearButton.setEnabled(false);
                 }
                 isPlay = !isPlay;
             }
         });
+
 
         //zoom-in the grid on click
         zoomButton.addActionListener(new ActionListener() {
@@ -203,6 +228,12 @@ public class GameOfLife{
                 if(square>10) {
                     zoomOutButton.setEnabled(true);
                 }
+
+                Dimension windowSize = jFrame.getSize();
+                cols = windowSize.width/square + 5;
+                rows = windowSize.height/square + 5;
+                isClickedArray = new boolean[(rows*cols)];
+
 
                 panel.repaint();
             }
@@ -220,6 +251,11 @@ public class GameOfLife{
                     zoomButton.setEnabled(true);
                 }
 
+                Dimension windowSize = jFrame.getSize();
+                cols = windowSize.width/square + 5;
+                rows = windowSize.height/square + 5;
+                isClickedArray = new boolean[(rows*cols)];
+
                 panel.repaint();
             }
         });
@@ -232,16 +268,27 @@ public class GameOfLife{
             }
         });
 
+        clearButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                Arrays.fill(isClickedArray, false);
+                panel.repaint();
+            }
+        });
+
+
         startButton.setFocusable(false);
         stepButton.setFocusable(false);
         zoomButton.setFocusable(false);
         zoomOutButton.setFocusable(false);
+        clearButton.setFocusable(false);
 
 
         topBar.add(startButton);
         topBar.add(stepButton);
         topBar.add(zoomButton);
         topBar.add(zoomOutButton);
+        topBar.add(clearButton);
 
         jFrame.addComponentListener(new ComponentAdapter() {
             @Override
@@ -250,8 +297,6 @@ public class GameOfLife{
                 cols = windowSize.width/square + 5;
                 rows = windowSize.height/square + 5;
                 isClickedArray = new boolean[(rows*cols)];
-
-
 
                 panel.revalidate();
             }
@@ -263,18 +308,16 @@ public class GameOfLife{
         jFrame.add(panel);
         jFrame.setVisible(true);
 
+        //Game loop
+        while(true) {
+            Thread.sleep(150);
+            if(isPlay) {
+                //isPlay = !isPlay;
+                isClickedArray = play(isClickedArray);
+                panel.repaint();
+            }
+        }
 
-//        while(true) {
-//            Thread.sleep(500);
-//            //for(int i=0; i<10; i++) {
-//            // int a = new Scanner(System.in).nextInt();
-//            if(isPlay) {
-//                isPlay = !isPlay;
-//                isClickedArray = play(isClickedArray);
-//                panel.repaint();
-//            }
-//        }
-        //  }
 
     }
 
